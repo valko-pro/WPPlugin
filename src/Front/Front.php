@@ -3,10 +3,10 @@
  * PluginName frontend part
  *
  * @since   {VERSION}
- * @link    https://github.com/wppunk/WPPlugin
+ * @link    {URL}
  * @license GPLv2 or later
  * @package PluginName
- * @author  WPPunk
+ * @author  {AUTHOR}
  */
 
 namespace PluginName\Front;
@@ -27,7 +27,7 @@ class Front {
 	 *
 	 * @since {VERSION}
 	 */
-	public function hooks() {
+	public function hooks(): void {
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_styles' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 	}
@@ -37,12 +37,10 @@ class Front {
 	 *
 	 * @since {VERSION}
 	 */
-	public function enqueue_styles() {
-		$min = Plugin::get_assets_suffix();
-
+	public function enqueue_styles(): void {
 		wp_enqueue_style(
 			'plugin-name',
-			PLUGIN_NAME_URL . "assets/css/main$min.css",
+			PLUGIN_NAME_URL . 'assets/build/css/main.css',
 			[],
 			Plugin::VERSION,
 			'all'
@@ -54,12 +52,10 @@ class Front {
 	 *
 	 * @since {VERSION}
 	 */
-	public function enqueue_scripts() {
-		$min = Plugin::get_assets_suffix();
-
+	public function enqueue_scripts(): void {
 		wp_enqueue_script(
 			'plugin-name',
-			PLUGIN_NAME_URL . "assets/js/main$min.js",
+			PLUGIN_NAME_URL . 'assets/build/js/main.js',
 			[],
 			Plugin::VERSION,
 			true

@@ -3,16 +3,19 @@
  * PluginName Bootstrap class
  *
  * @since   {VERSION}
- * @link    https://github.com/wppunk/WPPlugin
+ * @link    {URL}
  * @license GPLv2 or later
  * @package PluginName
- * @author  WPPunk
+ * @author  {AUTHOR}
  */
 
 namespace PluginName;
 
+use Exception;
 use PluginName\Front\Front;
-use PluginName\Admin\Settings;
+use PluginName\Admin\SettingsPage;
+use PluginName\Vendor\Auryn\Injector;
+use PluginName\Vendor\Auryn\InjectionException;
 
 /**
  * Class Plugin
@@ -32,50 +35,60 @@ class Plugin {
 	/**
 	 * Plugin version
 	 *
-	 * @sicne {VERSION}
+	 * @since {VERSION}
 	 */
 	const VERSION = '{VERSION}';
-
 	/**
-	 * Get suffix for assets URLs
+	 * Dependency Injection Container.
 	 *
 	 * @since {VERSION}
 	 *
-	 * @return string
+	 * @var Injector
 	 */
-	public static function get_assets_suffix(): string {
-		return constant( 'PLUGIN_NAME_DEBUG' ) ? '.min' : '';
+	private $injector;
+
+	/**
+	 * Plugin constructor.
+	 *
+	 * @param Injector $injector Dependency Injection Container.
+	 */
+	public function __construct( Injector $injector ) {
+		$this->injector = $injector;
 	}
 
 	/**
 	 * Run plugin
 	 *
 	 * @since {VERSION}
+	 *
+	 * @throws Exception Object doesn't exist.
 	 */
-	public function run() {
-		if ( is_admin() ) {
-			$this->run_admin();
-		} else {
-			$this->run_front();
-		}
+	public function run(): void {
+		is_admin()
+			? $this->run_admin()
+			: $this->run_front();
 	}
 
 	/**
 	 * Run admin part
 	 *
 	 * @since {VERSION}
+	 *
+	 * @throws InjectionException If a cyclic gets detected when provisioning.
 	 */
-	private function run_admin() {
-		( new Settings() )->hooks();
+	private function run_admin(): void {
+		$this->injector->make( SettingsPage::class )->hooks();
 	}
 
 	/**
 	 * Run frontend part
 	 *
 	 * @since {VERSION}
+	 *
+	 * @throws InjectionException If a cyclic gets detected when provisioning.
 	 */
-	private function run_front() {
-		( new Front() )->hooks();
+	private function run_front(): void {
+		$this->injector->make( Front::class )->hooks();
 	}
 
 }

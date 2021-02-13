@@ -6,15 +6,15 @@
  * Create and use 'params.local.php' instead.
  *
  * @since   {VERSION}
- * @link    https://github.com/wppunk/WPPlugin
+ * @link    {URL}
  * @license GPLv2 or later
  * @package PluginName
- * @author  WPPunk
+ * @author  {AUTHOR}
  */
 
 global $argv;
 
-if ( in_array( 'unit', $argv, true ) ) {
+if ( ! in_array( 'acceptance', $argv, true ) ) {
 	return [];
 }
 

@@ -54,17 +54,23 @@ jobs:
                 working-directory: ${{ env.wp-plugins-directory }}
                 run: |
                     composer install
-                    yarn install
+                    composer scoper
+                    composer dumpautoload
+                    npm install
 
             -   name: Validate Coding Standard
                 working-directory: ${{ env.wp-plugins-directory }}
-                run: |
-                    .vendor/bin/composer cs
-                    yarn cs
+                run: npm run cs
 
             -   name: Run unit tests
                 working-directory: ${{ env.wp-plugins-directory }}
-                run: .vendor/bin/composer unit
+                run: |
+                    composer unit
+                    npm run unit
+
+            -   name: Build assets
+                working-directory: ${{ env.wp-plugins-directory }}
+                run: npm run build:production
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
@@ -82,13 +88,13 @@ jobs:
                     chmod +x wp-cli.phar
                     mkdir -p wp-cli
                     sudo mv wp-cli.phar wp-cli/wp
-                    echo "::add-path::$GITHUB_WORKSPACE/wp-cli"
+                    echo "$GITHUB_WORKSPACE/wp-cli" >> $GITHUB_PATH
                     echo -n "apache_modules:\n  - mod_rewrite" > "${{ env.wp-directory }}/wp-cli.yml"
 
             -   name: Install WP
                 working-directory: ${{ env.wp-directory }}
                 run: |
-                    wp core download --version=5.4
+                    wp core download --version=5.5
                     wp config create --dbname="${{ env.DB_NAME }}" --dbuser="${{ env.DB_USER }}" --dbpass="${{ env.DB_PASSWORD }}" --dbhost="${{ env.DB_HOST }}" --dbprefix="${{ env.DB_TABLE_PREFIX }}"
                     wp core install --url="${{ env.WP_URL }}" --title="Test" --admin_user="${{ env.WP_ADMIN_USERNAME }}" --admin_password="${{ env.WP_ADMIN_PASSWORD }}" --admin_email="${{ env.WP_ADMIN_EMAIL }}" --skip-email
                     wp rewrite structure '/%postname%/' --hard
@@ -96,7 +102,8 @@ jobs:
 
             -   name: Make a DB dump for Codeception
                 working-directory: ${{ env.wp-plugins-directory }}
-                run: mysqldump --host="${{ env.DB_HOST }}" --user="${{ env.DB_USER }}" --password="${{ env.DB_PASSWORD }}" ${{ env.DB_NAME }} > .codeception/_data/dump.sql
+                run: mysqldump --column-statistics=0 --host="${{ env.DB_HOST }}" --user="${{ env.DB_USER }}" --password="${{ env.DB_PASSWORD }}" ${{ env.DB_NAME }} > .codeception/_data/dump.sql
+
 
             -   name: Setup hosts
                 run: |
@@ -126,7 +133,7 @@ jobs:
 
             -   name: Run Acceptance Tests
                 working-directory: ${{ env.wp-plugins-directory }}
-                run: .vendor/bin/composer acceptance -- --env github-actions
+                run: composer acceptance -- --env github-actions
 
             -   name: Archive Codeception output
                 uses: actions/upload-artifact@v1

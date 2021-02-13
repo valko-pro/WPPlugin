@@ -2,35 +2,28 @@
 
 ## Get Started
 
+One-line install:
 ```
-git clone https://github.com/wppunk/WPPlugin your-plugin-name
-cd your-plugin-name
-composer install
-yarn install
+composer create-project wppunk/wpplugin your-plugin-directory
 ```
 
-Make the following replacements throughout the project:
+Or you can copy the archive or clone via Git and then run:
 ```
-PLUGIN_NAME                                 => YOUR_AWESOME_PLUGIN
-PluginName                                  => YourAwesomePlugin
-plugin-name                                 => your-awesome-plugin
-Plugin Name                                 => Your Awesome Plugin
-plugin-name.php                             => your-awesome-plugin.php
-.packages/composer/phpcs-ruleset/PluginName => .packages/composer/phpcs-ruleset/YourAwesomePlugin
-.github/workflows/plugin-name.yml           => .github/workflows/your-awesome-plugin.yml
-.github/workflows/plugin-name.conf          => .github/workflows/your-awesome-plugin.conf
+composer init-project
 ```
 
 ## Requirements
 
 Make sure all dependencies have been installed before moving on:
 
-- WordPress >= 5.4
-- PHP >= 7.4.0 (You can easy to downgrade it)
+- WordPress
+- PHP >= 7.2.5 (You can easily downgrade it)
+    - DOM extension
+    - CURL extension
 - Composer
 - Node.js >= 14.8
-- Yarn
-- ChromeDriver
+- npm
+- ChromeDriver (for acceptance tests)
 
 ## Structure
 
@@ -44,33 +37,40 @@ plugins/your-awesome-plugin/        # → Root of your plugin.
 │   └── workflows/                  # → Workflows.
 │       ├── plugin-name.conf        # → Config for the server.
 │       └── plugin-name.yml         # → Actions for GitHub.
-├── .vendor/                        # → Composer packages (never edit).
-├── assets/                         # → Assets directory.
-│   ├── build/                      # → Assets build directory.
-│   └── src/                        # → Assets source directory.
-├── node_modules/                   # → JS packages (never edit). 
-├── templates/                      # → Templates for plugin views.
-├── tests/                          # → Tests.
+├── .tests/                         # → Tests.
 │   └── php                         # → PHP tests.
 │       ├── acceptance              # → PHP Acceptance tests.
 │       ├── unit                    # → PHP Unit tests.
 │       │   └── _bootstrap.php      # → Bootstrap file for PHP unit tests.
 │       ├── acceptance.suite.yml    # → Config file for the acceptance tests.
 │       └── unit.suite.yml          # → Config file for the unit tests.
-├── .eslintrc                       # → JS Coding Standards.
+├── assets/                         # → Assets directory.
+│   ├── build/                      # → Assets build directory.
+│   └── src/                        # → Assets source directory.
+├── node_modules/                   # → JS packages (never edit).
+├── src/                            # → PHP directory. 
+├── templates/                      # → Templates for plugin views.
+├── vendor/                         # → Composer packages (never edit).
+├── vendor_prefixes/                # → Prefixed composer packages for non-conflict mode (never edit).
+├── .codeception.yml                # → Main codeception config.
+├── .eslintignore                   # → JS Coding Standards ignore file.
+├── .eslintrc.js                    # → JS Coding Standards config.
+├── .gitconfig                      # → Config for git.
+├── .gitignore                      # → Git ignore file.
+├── .phpcs.xml                      # → Custom PHP Coding Standards.
+├── .scoper.inc.php                 # → Config for the PHP Scoper.
+├── .stylelintrc                    # → Config for the style linter.
+├── .webpack.mix.js                 # → Laravel Mix configuration file.
 ├── CHANGELOG.md                    # → Changelog file for GH.
-├── codeception.yml                 # → Main codeception config.
 ├── composer.json                   # → Composer dependencies and scripts.
 ├── composer.lock                   # → Composer lock file (never edit).
 ├── LICENSE                         # → License file.
 ├── package.json                    # → JS dependencies and scripts.
-├── phpcs.xml                       # → Custom PHP Coding Standards.
+├── package-lock.json               # → Package lock file (never edit).
 ├── plugin-name.php                 # → Bootstrap plugin file.
-├── postcss.config.js               # → PostCSS config file.
+├── README.md                       # → Readme MD for GitHub repository.
 ├── readme.txt                      # → Readme TXT for the wp.org repository.
-├── uninstall.php                   # → Uninstall file.
-├── webpack.config.js               # → Encore configuration file.
-└── yarn.lock                       # → Yarn lock file (never edit).
+└── uninstall.php                   # → Uninstall file.
 ```
 
 ## Autoload
@@ -79,15 +79,24 @@ We use PSR-4 and composer autoload for PSR-4. You can find it in `composer.json`
 
 ## Coding Standards
 
+To check all coding standards:
+```
+npm run cs
+```
+
 ### PHP Coding Standard (PHPCS)
 
 We use a custom coding standard based on [WordPress Coding Standard](https://github.com/WordPress/WordPress-Coding-Standards). We disabled rules for the naming of WordPress files for using PSR-4 autoload. Also, we have a [feature](https://github.com/PHPCompatibility/PHPCompatibilityWP), which can allow testing your code using different PHP environments.
 
-Custom PHPCS your can find in the `.packages/composer/phpcs-ruleset/PluginName/ruleset.xml`.
+Custom PHPCS your can find in the `.phpcs.xml`.
 
 Your can check PHPCS using a CLI:
 ```
 composer cs
+```
+or
+```
+npm run cs:php
 ``` 
 
 PHPCS checked before each commit, before the push, and in GH Actions.
@@ -96,23 +105,79 @@ PHPCS checked before each commit, before the push, and in GH Actions.
 
 We use a default WordPress JSCS, but you can modify it in the `.eslintrc` file. 
 
+You can check JSCS using a CLI:
+
+```
+npm run cs:js
+```
+
+### SCSS Coding Standard (SCSSCS)
+
+We use a default standards for SCSS, but you can modify it in the `.stylelintrc` file.
+
+You can check SCSSCS using a CLI:
+
+```
+npm run cs:scss
+```
+
 ## Frontend
 
 All assets are located in `assets/src/*`.
 
 All builds are located in `assets/build/*`.
 
-As CSS preprocessors we use PostCSS. You can add a some features in the `postcss.config.js` file. 
+CSS preprocessor is SCSS. 
 
-We use [Encore](https://symfony.com/doc/current/frontend.html) for the assets build. You can modify it in `webpack.config.js` file.
+We use [Laravel Mix](https://laravel-mix.com/) for the assets build. You can modify it in `.webpack.mix.js` file.
 
-## GH Actions
+For run Laravel mix you can use the next commands depend on situation:
+```
+npm run build
+npm run build:producation
+npm run start
+```
 
+## GitHub
+
+### GH Actions
 All steps for GH Actions you can find in `.github/workflows/plugin-name.yml` file. Also, for wake up a webserver, we need to add `.github/workflows/plugin-name.conf` 
 
-## Make your GH better
+### GH Hooks
 
-We use a [Husky](https://github.com/typicode/husky) and [Composer Git Hooks](https://github.com/BrainMaestro/composer-git-hooks) libraries to add actions before commit, push, etc. This helps developers make their GH more clear.
+Just make you GH repository clear. We use the [Husky](https://github.com/typicode/husky) library to add actions before commit, push, etc. This helps developers make their GH more clear.
+
+### GH Templates
+
+Basic GH templates for better security issues, support requests, bug reports, enhancements, feature requests, pull requests, and contributing templates.
+
+## Dependency injection container
+
+The lightweight [Dependency Injection](https://github.com/rdlowrey/auryn) component implements a PSR-11 compatible service container that allows you to standardize and centralize the way objects are constructed in your application.
+
+Automatic load your dependencies using the type hinting.
+
+You can disable plugin hooks very easily using a DIC. Just get the plugin object from the dependency injection container `$container_builder->get( PluginName\Front\Front::class )`. Example just disabling frontend assets:
+```
+function remove_plugin_name_frontend_assets( $injector ) {
+    $front = $injector->make( PluginName\Front\Front::class );
+    if ( ! $front ) {
+        return;
+    }
+    remove_action( 'wp_enqueue_scripts', [ $front, 'enqueue_styles' ] );
+    remove_action( 'wp_enqueue_scripts', [ $front, 'enqueue_scripts' ] );
+}
+
+add_action( 'plugin_name_init', 'remove_plugin_name_frontend_assets' );
+```
+
+## PHP Scoper
+
+You need to add prefixes for each outside dependency because other plugins or themes can use the same dependencies, and it can conflict between packages.
+
+```
+composer scoper
+```
 
 ## Automated testing
 
@@ -125,9 +190,9 @@ For running use a CLI command:
 composer unit
 ```
 
-- Main configuration file `tests/php/unit.suite.yml`
-- Unit tests inside `tests/php/unit/*` folder.
-- Bootstrap file `tests/php/unit/_bootstrap.php`
+- Main configuration file `.tests/php/unit.suite.yml`
+- Unit tests inside `.tests/php/unit/*` folder.
+- Bootstrap file `.tests/php/unit/_bootstrap.php`
 - Each filename for test class must have a suffix on `*Test.php`.
 - Each test class must extend a `PluginNameUnitTests\TestCase` class.
 - You can also add some code to `PluginNameUnitTests\TestCase.php`
@@ -168,10 +233,25 @@ For running use a CLI command:
 composer acceptance
 ```
 
-- Main configuration file `tests/php/acceptance.suite.yml`
-- Unit tests inside `tests/php/acceptace/*` folder.
+- Main configuration file `.tests/php/acceptance.suite.yml`
+- Unit tests inside `.tests/php/acceptace/*` folder.
 - Each filename for test class must have a suffix on `*Cest.php`.
 - Each test method must have prefix `test_`
 - Each test method must include `AcceptanceTester` as argument.
 - You can add some methods to AcceptanceTester in `.codeception/_support/AcceptanceTests.php`.
-- Additional files for autoloading in tests running you can add to `.codeception/_support/*` folder.
+- Additional files for autoload in tests running you can add to `.codeception/_support/*` folder.
+
+### JS unit tests
+
+For running use a CLI command:
+```
+npm run unit
+```
+
+- Main configuration inside `.tests/js/package.json` in directory `jest`
+- Unit tests inside `.tests/js/unit/*` folder.
+- Bootstrap file `.tests/js/setupTests.js`
+- Each filename for test class must have a suffix on `*.test.js`.
+- Just import your class for testing and write tests.
+
+Also, unit tests will be checked on a push to repository action and inside the GH Actions pipeline.
